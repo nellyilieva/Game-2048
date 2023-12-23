@@ -1,5 +1,8 @@
 #include <iostream>
 #include <string>
+#include <cstdlib>
+#include <ctime>
+
 using namespace std;
 
 const size_t SIZE = 10;
@@ -9,7 +12,7 @@ void printMenu() {
 	cout << "Start game (enter 's' to start new game)" << endl;
 	cout << "Leaderboard (enter 'l' to see leaderboard)" << endl;
 	cout << "Quit (enter 'q' to quit)" << endl;
-}
+} 
 
 void interactWithMenu(char ch) {
 
@@ -39,7 +42,7 @@ bool checkSize(int SIZE) {
 }
 
 void returnPoints(int points) {
-
+	//add points
 }
 
 void printMatrix(int matrix[][SIZE], const size_t SIZE) {
@@ -55,9 +58,46 @@ void commandsMovement(char command) {
 	//logic for game	
 }
 
-void randomGenerator() {
-	//check if free position
-	//add 2 or 4 on random free postion
+bool hasFreePosition(int matrix[][SIZE], const size_t SIZE) {
+	for (int i = 0; i < SIZE; i++) {
+		for (int j = 0; j < SIZE; j++) {
+			if (matrix[i][j] == 0) {
+				return true;
+			}
+		}
+	}
+	return false;
+}
+
+int returnOnRandomTwoOrFour() {
+	srand(static_cast<unsigned int>(time(nullptr)));
+
+	if (rand() % 2 == 0) {
+		return 2;
+	}
+	else {
+		return 4;
+	}
+}
+
+void randomGenerator(int matrix[][SIZE], const size_t SIZE) {
+	
+	if (!hasFreePosition(matrix[][SIZE], SIZE)) {
+		return;
+	}
+
+	srand(static_cast<unsigned int>(time(nullptr)));
+
+	while (true) {
+		size_t randomRow = rand() % SIZE;
+		size_t randomCol = rand() % SIZE;
+
+		if (matrix[randomRow][randomCol] == 0) {
+			matrix[randomRow][randomCol] = returnOnRandomTwoOrFour();
+			break;
+		}
+	}
+	printMatrix(matrix, SIZE);
 }
 
 void safeInfoAboutPlayer(string nickname, const int SIZE) {
@@ -86,6 +126,8 @@ int main()
 	size_t dimension;
 	int points = 0;
 
+	int board[SIZE][SIZE] = { 0 };
+
 	if (ch == 's') {
 		cout << "Enter your nickname: " << endl;
 		cin >> nickname;
@@ -94,10 +136,9 @@ int main()
 		cin >> dimension;
 
 		if (checkSize(dimension)) {
-			int board[SIZE][SIZE] = { 0 };
-			printMatrix(board, dimension);
+			randomGenerator(board, dimension);
 
-			cout << points;
+			cout << points << endl;
 		}
 	}
 }
