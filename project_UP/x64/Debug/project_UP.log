@@ -1,0 +1,3 @@
+﻿  project_UP.cpp
+C:\Users\User1\source\repos\project_UP\project_UP\project_UP.cpp(96,17): warning C4267: 'argument': conversion from 'size_t' to 'int', possible loss of data
+  project_UP.vcxproj -> C:\Users\User1\source\repos\project_UP\x64\Debug\project_UP.exe
