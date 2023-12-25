@@ -12,7 +12,7 @@ void printMenu() {
 	cout << "Start game (enter 's' to start new game)" << endl;
 	cout << "Leaderboard (enter 'l' to see leaderboard)" << endl;
 	cout << "Quit (enter 'q' to quit)" << endl;
-} 
+}
 
 void interactWithMenu(char ch) {
 
@@ -34,15 +34,15 @@ void interactWithMenu(char ch) {
 	}
 }
 
+void returnPoints(int points) {
+	//???
+}
+
 bool checkSize(int SIZE) {
 	if (SIZE < 4 || SIZE > 10) {
 		return false;
 	}
 	return true;
-}
-
-void returnPoints(int points) {
-	//add points
 }
 
 void printMatrix(int matrix[][SIZE], const size_t SIZE) {
@@ -52,10 +52,7 @@ void printMatrix(int matrix[][SIZE], const size_t SIZE) {
 		}
 		cout << endl;
 	}
-}
-
-void commandsMovement(char command) {
-	//logic for game	
+	cout << endl;
 }
 
 bool hasFreePosition(int matrix[][SIZE], const size_t SIZE) {
@@ -70,23 +67,22 @@ bool hasFreePosition(int matrix[][SIZE], const size_t SIZE) {
 }
 
 int returnOnRandomTwoOrFour() {
+	// Seed the random number generator with the current time
 	srand(static_cast<unsigned int>(time(nullptr)));
 
-	if (rand() % 2 == 0) {
-		return 2;
-	}
-	else {
-		return 4;
-	}
+	// Generate a random number (50% chance of 2, 50% chance of 4)
+	return (rand() % 2 == 0) ? 2 : 4;
 }
 
 void randomGenerator(int matrix[][SIZE], const size_t SIZE) {
-	
-	if (!hasFreePosition(matrix[][SIZE], SIZE)) {
+
+	if (!hasFreePosition(matrix, SIZE)) {
 		return;
 	}
 
 	srand(static_cast<unsigned int>(time(nullptr)));
+	//This line seeds the random number generator(rand()) with the current time.
+	//It ensures that you get a different sequence of random numbers on each program run.
 
 	while (true) {
 		size_t randomRow = rand() % SIZE;
@@ -100,13 +96,140 @@ void randomGenerator(int matrix[][SIZE], const size_t SIZE) {
 	printMatrix(matrix, SIZE);
 }
 
-void safeInfoAboutPlayer(string nickname, const int SIZE) {
-	//check if result is in top 5
-	//safe in specific file (result and nickname)
+bool validCommand(char command) {
+	if (command == 'w' || command == 'a' || command == 's' || command == 'd') {
+		return true;
+	}
+
+	return false;
+}
+
+void makeMoveRight(int matrix[][SIZE], const size_t SIZE) {
+	for (int i = 0; i < SIZE; i++) {
+		for (int j = 0; j < SIZE - 1; j++) {
+			int curr = matrix[i][j];
+			int nextCoordinate = j + 1;
+
+			if (curr == 0) {
+				continue;
+			}
+
+			if (matrix[i][nextCoordinate] == 0) {
+				matrix[i][nextCoordinate] = curr;
+				matrix[i][j] = 0;
+			}
+
+			else if (curr == matrix[i][nextCoordinate]) {
+				matrix[i][nextCoordinate] += curr;
+				curr = 0;
+			}
+		}
+	}
+
+	printMatrix(matrix, SIZE);
+}
+
+void makeMoveLeft(int matrix[][SIZE], const size_t SIZE) {
+	for (int i = 0; i < SIZE; i++) {
+		for (int j = SIZE - 1; j > 0; j--) {
+			int curr = matrix[i][j];
+			int nextCoordinate = j - 1;
+
+			if (curr == 0) {
+				continue;
+			}
+
+			if (matrix[i][nextCoordinate] == 0) {
+				matrix[i][nextCoordinate] = curr;
+				matrix[i][j] = 0;
+			}
+
+			else if (curr == matrix[i][nextCoordinate]) {
+				matrix[i][nextCoordinate] += curr;
+				curr = 0;
+			}
+		}
+	}
+
+	printMatrix(matrix, SIZE);
+}
+
+void makeMoveDown(int matrix[][SIZE], const size_t SIZE) {
+	for (int i = 0; i < SIZE; i++) {
+		for (int j = 0; j < SIZE - 1; j++) {
+			int curr = matrix[j][i];
+			int nextCoordinate = j + 1;
+
+			if (curr == 0) {
+				continue;
+			}
+
+			if (matrix[nextCoordinate][i] == 0) {
+				matrix[nextCoordinate][i] = curr;
+				matrix[j][i] = 0;
+			}
+
+			else if (curr == matrix[nextCoordinate][i]) {
+				matrix[nextCoordinate][i] += curr;
+				curr = 0;
+			}
+		}
+	}
+
+	printMatrix(matrix, SIZE);
+}
+
+void makeMoveUp(int matrix[][SIZE], const size_t SIZE) {
+	for (int i = 0; i < SIZE; i++) {
+		for (int j = SIZE - 1; j > 0; j--) {
+			int curr = matrix[j][i];
+			int nextCoordinate = j - 1;
+
+			if (curr == 0) {
+				continue;
+			}
+
+			if (matrix[nextCoordinate][i] == 0) {
+				matrix[nextCoordinate][i] = curr;
+				matrix[j][i] = 0;
+			}
+
+			else if (curr == matrix[nextCoordinate][i]) {
+				matrix[nextCoordinate][i] += curr;
+				curr = 0;
+			}
+		}
+	}
+
+	printMatrix(matrix, SIZE);
+}
+
+void commandsMovement(char command, int matrix[][SIZE], const size_t SIZE) {
+	if (!validCommand(command)) {
+		return;
+	}
+
+	if (command == 'w') {
+		makeMoveUp(matrix, SIZE);
+	}
+	else if (command == 'a') {
+		makeMoveLeft(matrix, SIZE);
+	}
+	else if (command == 's') {
+		makeMoveDown(matrix, SIZE);
+	}
+	else {
+		makeMoveRight(matrix, SIZE);
+	}
 }
 
 void playGame(const int matrix[][10], const int SIZE, char command) {
 
+}
+
+void safeInfoAboutPlayer(string nickname, const int SIZE) {
+	//check if result is in top 5
+	//safe in specific file (result and nickname)
 }
 
 void showLeaderboard(const int SIZE) {
@@ -125,6 +248,7 @@ int main()
 	string nickname;
 	size_t dimension;
 	int points = 0;
+	char command;
 
 	int board[SIZE][SIZE] = { 0 };
 
@@ -138,7 +262,12 @@ int main()
 		if (checkSize(dimension)) {
 			randomGenerator(board, dimension);
 
-			cout << points << endl;
+			cin >> command;
+
+			commandsMovement(command, board, dimension);
+
 		}
 	}
+
+
 }
