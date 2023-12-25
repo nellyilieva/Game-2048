@@ -67,10 +67,8 @@ bool hasFreePosition(int matrix[][SIZE], const size_t SIZE) {
 }
 
 int returnOnRandomTwoOrFour() {
-	// Seed the random number generator with the current time
 	srand(static_cast<unsigned int>(time(nullptr)));
 
-	// Generate a random number (50% chance of 2, 50% chance of 4)
 	return (rand() % 2 == 0) ? 2 : 4;
 }
 
@@ -81,8 +79,6 @@ void randomGenerator(int matrix[][SIZE], const size_t SIZE) {
 	}
 
 	srand(static_cast<unsigned int>(time(nullptr)));
-	//This line seeds the random number generator(rand()) with the current time.
-	//It ensures that you get a different sequence of random numbers on each program run.
 
 	while (true) {
 		size_t randomRow = rand() % SIZE;
