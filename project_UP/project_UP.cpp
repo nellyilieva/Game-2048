@@ -2,6 +2,7 @@
 #include <string>
 #include <cstdlib>
 #include <ctime>
+#include <fstream>
 
 using namespace std;
 
@@ -100,6 +101,7 @@ bool validCommand(char command) {
 	return false;
 }
 
+
 void makeMoveRight(int matrix[][SIZE], const size_t SIZE) {
 	for (int i = 0; i < SIZE; i++) {
 		for (int j = 0; j < SIZE - 1; j++) {
@@ -117,12 +119,10 @@ void makeMoveRight(int matrix[][SIZE], const size_t SIZE) {
 
 			else if (curr == matrix[i][nextCoordinate]) {
 				matrix[i][nextCoordinate] += curr;
-				curr = 0;
+				matrix[i][j] = 0;
 			}
 		}
 	}
-
-	printMatrix(matrix, SIZE);
 }
 
 void makeMoveLeft(int matrix[][SIZE], const size_t SIZE) {
@@ -142,12 +142,10 @@ void makeMoveLeft(int matrix[][SIZE], const size_t SIZE) {
 
 			else if (curr == matrix[i][nextCoordinate]) {
 				matrix[i][nextCoordinate] += curr;
-				curr = 0;
+				matrix[i][j] = 0;
 			}
 		}
 	}
-
-	printMatrix(matrix, SIZE);
 }
 
 void makeMoveDown(int matrix[][SIZE], const size_t SIZE) {
@@ -167,12 +165,10 @@ void makeMoveDown(int matrix[][SIZE], const size_t SIZE) {
 
 			else if (curr == matrix[nextCoordinate][i]) {
 				matrix[nextCoordinate][i] += curr;
-				curr = 0;
+				matrix[j][i] = 0;
 			}
 		}
 	}
-
-	printMatrix(matrix, SIZE);
 }
 
 void makeMoveUp(int matrix[][SIZE], const size_t SIZE) {
@@ -192,13 +188,12 @@ void makeMoveUp(int matrix[][SIZE], const size_t SIZE) {
 
 			else if (curr == matrix[nextCoordinate][i]) {
 				matrix[nextCoordinate][i] += curr;
-				curr = 0;
+				matrix[j][i] = 0;
 			}
 		}
 	}
-
-	printMatrix(matrix, SIZE);
 }
+
 
 void commandsMovement(char command, int matrix[][SIZE], const size_t SIZE) {
 	if (!validCommand(command)) {
@@ -219,18 +214,36 @@ void commandsMovement(char command, int matrix[][SIZE], const size_t SIZE) {
 	}
 }
 
-void playGame(const int matrix[][10], const int SIZE, char command) {
-
+void playGame(int matrix[][10], const int SIZE, char command) {
+	if (checkSize(SIZE) && hasFreePosition(matrix, SIZE)) {
+		commandsMovement(command, matrix, SIZE);
+		randomGenerator(matrix, SIZE);
+	}
 }
 
 void safeInfoAboutPlayer(string nickname, const int SIZE) {
 	//check if result is in top 5
-	//safe in specific file (result and nickname)
+
+	if (SIZE >= 4 && SIZE <= 10) {
+		ofstream file(to_string(SIZE) + "Dimension.txt", ios::app);
+		file << nickname << " - " << "points" << endl;
+		file.close();
+	}
 }
 
 void showLeaderboard(const int SIZE) {
-	//ask for size
-	//go to file for size and show top 5
+	string text;
+
+	if (SIZE >= 4 && SIZE <= 10) {
+
+		ifstream file(to_string(SIZE) + "Dimension.txt");
+
+		while (getline(file, text)) {
+			cout << text;
+		}
+
+		file.close();
+	}
 }
 
 int main()
@@ -255,15 +268,17 @@ int main()
 		cout << "Enter dimension: " << endl;
 		cin >> dimension;
 
-		if (checkSize(dimension)) {
-			randomGenerator(board, dimension);
+		safeInfoAboutPlayer(nickname, dimension);
 
+		randomGenerator(board, dimension);
+		while (hasFreePosition(board, dimension)) {
 			cin >> command;
-
-			commandsMovement(command, board, dimension);
-
+			playGame(board, dimension, command);
 		}
 	}
-
-
+	else if (ch == 'l') {
+		cout << "Enter dimension: ";
+		cin >> dimension;
+		showLeaderboard(dimension);
+	}
 }
