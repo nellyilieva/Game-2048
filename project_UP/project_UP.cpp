@@ -1,3 +1,20 @@
+/**
+*
+* Solution to course project # 4
+* Introduction to programming course
+* Faculty of Mathematics and Informatics of Sofia University
+* Winter semester 2023/2024
+*
+* @author Nelly Ilieva
+* @idnumber 1MI0600400
+* @compiler VC
+*
+* Game 2048
+*
+*/
+
+
+
 #include <iostream>
 #include <string>
 #include <fstream>
@@ -11,41 +28,25 @@ const size_t SIZE = 10;
 int points = 0;
 
 void printMenu() {
+	cout << "-enter 's' to Start new game-" << endl;
+	cout << "-enter 'l' to see Leaderboard-" << endl;
+	cout << "-enter 'q' to Quit-" << endl;
+	cout << endl;
+	cout << "-to make move up use 'w'-" << endl;
+	cout << "-to make move down use 's'-" << endl;
+	cout << "-to make move left use 'a'-" << endl;
+	cout << "-to make move right use 'd'-" << endl;
+	cout << endl;
 	cout << "MENU" << endl;
-	cout << "Start game (enter 's' to start new game)" << endl;
-	cout << "Leaderboard (enter 'l' to see leaderboard)" << endl;
-	cout << "Quit (enter 'q' to quit)" << endl;
-}
-
-void interactWithMenu(char ch) {
-
-	//start game
-	if (ch == 's') {
-		cout << "game" << endl;
-	}
-	//ask for size and then show top 5
-	else if (ch == 'l') {
-		cout << "top 5" << endl;
-	}
-	//end game
-	else if (ch == 'q') {
-		cout << "end of game" << endl;
-	}
-	//to enter valid command
-	else {
-		cout << "enter valid command" << endl;
-	}
+	cout << "Start game" << endl;
+	cout << "Leaderboard" << endl;
+	cout << "Quit" << endl;
 }
 
 int returnOnRandomTwoOrFour() {
 	srand(static_cast<unsigned int>(time(nullptr)));
 
 	return (rand() % 2 == 0) ? 2 : 4;
-}
-
-int returnPoints(int points) {
-	points += returnOnRandomTwoOrFour();
-	return points;
 }
 
 bool checkSize(int SIZE) {
@@ -62,7 +63,7 @@ void printMatrix(int matrix[][SIZE], const size_t SIZE, int points) {
 		}
 		cout << endl;
 	}
-	cout << "Score: " << returnPoints(points) << endl;
+	cout << "Score: " << points << endl;
 }
 
 bool hasFreePosition(int matrix[][SIZE], const size_t SIZE) {
@@ -76,21 +77,9 @@ bool hasFreePosition(int matrix[][SIZE], const size_t SIZE) {
 	return false;
 }
 
-bool canMakeMove(int matrix[][SIZE], const size_t SIZE) {
-	for (int i = 0; i < SIZE - 1; i++) {
-		for (int j = 0; j < SIZE - 1; j++) {
-			if (matrix[i + 1][j] == matrix[i][j] || matrix[i][j + 1] == matrix[i][j]) {
-				return true;
-			}
-		}
-	}
-	return false;
-}
-
-void randomGenerator(int matrix[][SIZE], const size_t SIZE) {
-
+unsigned randomGenerator(int matrix[][SIZE], const size_t SIZE) {
 	if (!hasFreePosition(matrix, SIZE)) {
-		return;
+		return -1;
 	}
 
 	srand(static_cast<unsigned int>(time(nullptr)));
@@ -104,11 +93,12 @@ void randomGenerator(int matrix[][SIZE], const size_t SIZE) {
 			break;
 		}
 	}
+	points += returnOnRandomTwoOrFour();
 	printMatrix(matrix, SIZE, points);
 }
 
 bool validCommand(char command) {
-	if (command == 'w' || command == 'a' || command == 's' || command == 'd' || command == 'q') {
+	if (command == 'w' || command == 'a' || command == 's' || command == 'd') {
 		return true;
 	}
 
@@ -219,12 +209,12 @@ void makeMoveDown(int matrix[][SIZE], const size_t SIZE) {
 }
 
 void makeMoveUp(int matrix[][SIZE], const size_t SIZE) {
-	for (int i = 0; i < SIZE; i++) {          //col
+	for (int i = 0; i < SIZE; i++) {
 
 		int nextCol = i;
 		int nextRow = 0;
 
-		for (int j = 1; j < SIZE; j++) {      //row
+		for (int j = 1; j < SIZE; j++) {
 
 			int curr = matrix[j][i];
 
@@ -259,95 +249,120 @@ void makeMoveUp(int matrix[][SIZE], const size_t SIZE) {
 
 
 void commandsMovement(char command, int matrix[][SIZE], const size_t SIZE) {
-	if (!validCommand(command)) {
-		return;
-	}
-
-	if (command == 'w') {
+	switch (command) {
+	case 'w':
 		makeMoveUp(matrix, SIZE);
-	}
-	else if (command == 'a') {
+		break;
+	case 'a':
 		makeMoveLeft(matrix, SIZE);
-	}
-	else if (command == 's') {
+		break;
+	case 's':
 		makeMoveDown(matrix, SIZE);
-	}
-	else if (command == 'd') {
+		break;
+	case 'd':
 		makeMoveRight(matrix, SIZE);
-	}
-	else {
-		return;
+		break;
 	}
 }
 
-void playGame(int matrix[][10], const int SIZE, char command) {
+void playGame(int matrix[][10], const int SIZE, char command, int& points) {
 
-	if (checkSize(SIZE) && hasFreePosition(matrix, SIZE)) {
-		commandsMovement(command, matrix, SIZE);
-		randomGenerator(matrix, SIZE);
+	if (hasFreePosition(matrix, SIZE)) {
+		if (!validCommand(command)) {
+			printMatrix(matrix, SIZE, points);
+		}
+		else {
+			commandsMovement(command, matrix, SIZE);
+			randomGenerator(matrix, SIZE);
+		}
 	}
+
 }
 
-void safeInfoAboutPlayer(string nickname, const int SIZE, int points) {
-	//check if result is in top 5
-
-
+unsigned safeInfoAboutPlayer(string nickname, const int SIZE, int& points) {
 	if (SIZE >= 4 && SIZE <= 10) {
 		ofstream file(to_string(SIZE) + "Dimension.txt", ios::app);
-		file << nickname << " - " << returnPoints(points) << endl;
+
+		if (!file.is_open()) {
+			return false;
+		}
+
+		file << nickname << " - " << points << endl;
+
+		file.clear();
 		file.close();
 	}
 }
-
-void showLeaderboard(const int SIZE) {
+unsigned showLeaderboard(const int SIZE) {
 	string text;
 
 	if (SIZE >= 4 && SIZE <= 10) {
 
 		ifstream file(to_string(SIZE) + "Dimension.txt");
 
-		while (getline(file, text)) {
-			cout << text;
+		if (!file.is_open()) {
+			return false;
 		}
 
+		while (getline(file, text)) {
+			cout << text << endl;
+		}
+
+		file.clear();
 		file.close();
 	}
 }
 
 int main()
 {
-	printMenu();
+	while (true) {
+		printMenu();
 
-	char ch;
-	cin >> ch;
-	interactWithMenu(ch);
+		char ch;
+		cin >> ch;
 
-	string nickname;
-	size_t dimension;
-	int points = 0;
-	char command;
+		string nickname;
+		size_t dimension;
+		char command;
 
-	int board[SIZE][SIZE] = { 0 };
+		int board[SIZE][SIZE] = { 0 };
 
-	if (ch == 's') {
-		cout << "Enter your nickname: " << endl;
-		cin >> nickname;
+		if (ch == 's') {
+			cout << "Enter your nickname: " << endl;
+			cin >> nickname;
 
-		cout << "Enter dimension: " << endl;
-		cin >> dimension;
+			cout << "Enter dimension between 4 and 10: " << endl;
+			cin >> dimension;
 
-		safeInfoAboutPlayer(nickname, dimension, points);
+			if (!checkSize(dimension)) {
+				cout << "Invalid dimension!" << endl;
+				exit(0);
+			}
 
-		randomGenerator(board, dimension);
-		while (hasFreePosition(board, dimension)) {
-			cin >> command;
-			playGame(board, dimension, command);
+			randomGenerator(board, dimension);
+			while (hasFreePosition(board, dimension)) {
+				cin >> command;
+				playGame(board, dimension, command, points);
+				points += returnOnRandomTwoOrFour();
+			}
+
+			safeInfoAboutPlayer(nickname, dimension, points);
+			points = 0;
 		}
-	}
-	else if (ch == 'l') {
+		else if (ch == 'l') {
+			cout << "Enter dimension: ";
+			cin >> dimension;
+			showLeaderboard(dimension);
+			exit(0);
+		}
 
-		cout << "Enter dimension: ";
-		cin >> dimension;
-		showLeaderboard(dimension);
+		else if (ch == 'q') {
+			cout << "END" << endl;
+			exit(0);
+		}
+
+		else {
+			cout << "Enter valid command!" << endl;
+		}
 	}
 }
