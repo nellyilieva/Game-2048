@@ -1,12 +1,14 @@
 #include <iostream>
 #include <string>
+#include <fstream>
 #include <cstdlib>
 #include <ctime>
-#include <fstream>
+#include <iomanip>
 
 using namespace std;
 
 const size_t SIZE = 10;
+int points = 0;
 
 void printMenu() {
 	cout << "MENU" << endl;
@@ -35,8 +37,15 @@ void interactWithMenu(char ch) {
 	}
 }
 
-void returnPoints(int points) {
-	//???
+int returnOnRandomTwoOrFour() {
+	srand(static_cast<unsigned int>(time(nullptr)));
+
+	return (rand() % 2 == 0) ? 2 : 4;
+}
+
+int returnPoints(int points) {
+	points += returnOnRandomTwoOrFour();
+	return points;
 }
 
 bool checkSize(int SIZE) {
@@ -46,14 +55,14 @@ bool checkSize(int SIZE) {
 	return true;
 }
 
-void printMatrix(int matrix[][SIZE], const size_t SIZE) {
+void printMatrix(int matrix[][SIZE], const size_t SIZE, int points) {
 	for (int i = 0; i < SIZE; i++) {
 		for (int j = 0; j < SIZE; j++) {
-			cout << matrix[i][j] << " ";
+			cout << setw(4) << matrix[i][j] << " ";
 		}
 		cout << endl;
 	}
-	cout << endl;
+	cout << "Score: " << returnPoints(points) << endl;
 }
 
 bool hasFreePosition(int matrix[][SIZE], const size_t SIZE) {
@@ -67,10 +76,15 @@ bool hasFreePosition(int matrix[][SIZE], const size_t SIZE) {
 	return false;
 }
 
-int returnOnRandomTwoOrFour() {
-	srand(static_cast<unsigned int>(time(nullptr)));
-
-	return (rand() % 2 == 0) ? 2 : 4;
+bool canMakeMove(int matrix[][SIZE], const size_t SIZE) {
+	for (int i = 0; i < SIZE - 1; i++) {
+		for (int j = 0; j < SIZE - 1; j++) {
+			if (matrix[i + 1][j] == matrix[i][j] || matrix[i][j + 1] == matrix[i][j]) {
+				return true;
+			}
+		}
+	}
+	return false;
 }
 
 void randomGenerator(int matrix[][SIZE], const size_t SIZE) {
@@ -90,36 +104,45 @@ void randomGenerator(int matrix[][SIZE], const size_t SIZE) {
 			break;
 		}
 	}
-	printMatrix(matrix, SIZE);
+	printMatrix(matrix, SIZE, points);
 }
 
 bool validCommand(char command) {
-	if (command == 'w' || command == 'a' || command == 's' || command == 'd') {
+	if (command == 'w' || command == 'a' || command == 's' || command == 'd' || command == 'q') {
 		return true;
 	}
 
 	return false;
 }
 
-
 void makeMoveRight(int matrix[][SIZE], const size_t SIZE) {
 	for (int i = 0; i < SIZE; i++) {
-		for (int j = 0; j < SIZE - 1; j++) {
+		int nextRow = i;
+		int nextCol = SIZE - 1;
+
+		for (int j = SIZE - 2; j >= 0; j--) {
 			int curr = matrix[i][j];
-			int nextCoordinate = j + 1;
 
-			if (curr == 0) {
-				continue;
-			}
-
-			if (matrix[i][nextCoordinate] == 0) {
-				matrix[i][nextCoordinate] = curr;
-				matrix[i][j] = 0;
-			}
-
-			else if (curr == matrix[i][nextCoordinate]) {
-				matrix[i][nextCoordinate] += curr;
-				matrix[i][j] = 0;
+			if (curr != 0) {
+				if (matrix[i][j + 1] == 0 || matrix[i][j + 1] == curr) {
+					if (matrix[nextRow][nextCol] == curr) {
+						matrix[nextRow][nextCol] *= 2;
+						matrix[i][j] = 0;
+					}
+					else {
+						if (matrix[nextRow][nextCol] == 0) {
+							matrix[nextRow][nextCol] = curr;
+							matrix[i][j] = 0;
+						}
+						else {
+							matrix[nextRow][--nextCol] = matrix[i][j];
+							matrix[i][j] = 0;
+						}
+					}
+				}
+				else {
+					nextCol--;
+				}
 			}
 		}
 	}
@@ -127,22 +150,32 @@ void makeMoveRight(int matrix[][SIZE], const size_t SIZE) {
 
 void makeMoveLeft(int matrix[][SIZE], const size_t SIZE) {
 	for (int i = 0; i < SIZE; i++) {
-		for (int j = SIZE - 1; j > 0; j--) {
+		int nextRow = i;
+		int nextCol = 0;
+
+		for (int j = 1; j < SIZE; j++) {
 			int curr = matrix[i][j];
-			int nextCoordinate = j - 1;
 
-			if (curr == 0) {
-				continue;
-			}
-
-			if (matrix[i][nextCoordinate] == 0) {
-				matrix[i][nextCoordinate] = curr;
-				matrix[i][j] = 0;
-			}
-
-			else if (curr == matrix[i][nextCoordinate]) {
-				matrix[i][nextCoordinate] += curr;
-				matrix[i][j] = 0;
+			if (curr != 0) {
+				if (matrix[i][j - 1] == 0 || matrix[i][j - 1] == curr) {
+					if (matrix[nextRow][nextCol] == curr) {
+						matrix[nextRow][nextCol] *= 2;
+						matrix[i][j] = 0;
+					}
+					else {
+						if (matrix[nextRow][nextCol] == 0) {
+							matrix[nextRow][nextCol] = curr;
+							matrix[i][j] = 0;
+						}
+						else {
+							matrix[nextRow][++nextCol] = matrix[i][j];
+							matrix[i][j] = 0;
+						}
+					}
+				}
+				else {
+					nextCol++;
+				}
 			}
 		}
 	}
@@ -150,45 +183,75 @@ void makeMoveLeft(int matrix[][SIZE], const size_t SIZE) {
 
 void makeMoveDown(int matrix[][SIZE], const size_t SIZE) {
 	for (int i = 0; i < SIZE; i++) {
-		for (int j = 0; j < SIZE - 1; j++) {
+
+		int nextCol = i;
+		int nextRow = SIZE - 1;
+
+		for (int j = SIZE - 2; j >= 0; j--) {
 			int curr = matrix[j][i];
-			int nextCoordinate = j + 1;
 
-			if (curr == 0) {
-				continue;
+			if (curr != 0) {
+				if (matrix[j + 1][i] == 0 || matrix[j + 1][i] == curr) {
+					if (matrix[nextRow][nextCol] == curr) {
+						matrix[nextRow][nextCol] *= 2;
+						matrix[j][i] = 0;
+					}
+					else {
+						if (matrix[nextRow][nextCol] == 0) {
+							matrix[nextRow][nextCol] = curr;
+							matrix[j][i] = 0;
+						}
+						else
+						{
+							matrix[--nextRow][nextCol] = curr;
+							matrix[j][i] = 0;
+						}
+
+					}
+				}
+				else {
+					nextRow--;
+				}
 			}
 
-			if (matrix[nextCoordinate][i] == 0) {
-				matrix[nextCoordinate][i] = curr;
-				matrix[j][i] = 0;
-			}
-
-			else if (curr == matrix[nextCoordinate][i]) {
-				matrix[nextCoordinate][i] += curr;
-				matrix[j][i] = 0;
-			}
 		}
 	}
 }
 
 void makeMoveUp(int matrix[][SIZE], const size_t SIZE) {
-	for (int i = 0; i < SIZE; i++) {
-		for (int j = SIZE - 1; j > 0; j--) {
+	for (int i = 0; i < SIZE; i++) {          //col
+
+		int nextCol = i;
+		int nextRow = 0;
+
+		for (int j = 1; j < SIZE; j++) {      //row
+
 			int curr = matrix[j][i];
-			int nextCoordinate = j - 1;
 
-			if (curr == 0) {
-				continue;
-			}
+			if (curr != 0) {
 
-			if (matrix[nextCoordinate][i] == 0) {
-				matrix[nextCoordinate][i] = curr;
-				matrix[j][i] = 0;
-			}
+				if (matrix[j - 1][i] == 0 || matrix[j - 1][i] == curr) {
 
-			else if (curr == matrix[nextCoordinate][i]) {
-				matrix[nextCoordinate][i] += curr;
-				matrix[j][i] = 0;
+					if (matrix[nextRow][nextCol] == curr) {
+						matrix[nextRow][nextCol] *= 2;
+						matrix[j][i] = 0;
+					}
+
+					else {
+
+						if (matrix[nextRow][nextCol] == 0) {
+							matrix[nextRow][nextCol] = curr;
+							matrix[j][i] = 0;
+						}
+						else {
+							matrix[++nextRow][nextCol] = curr;
+							matrix[j][i] = 0;
+						}
+					}
+				}
+				else {
+					nextRow++;
+				}
 			}
 		}
 	}
@@ -209,24 +272,29 @@ void commandsMovement(char command, int matrix[][SIZE], const size_t SIZE) {
 	else if (command == 's') {
 		makeMoveDown(matrix, SIZE);
 	}
-	else {
+	else if (command == 'd') {
 		makeMoveRight(matrix, SIZE);
+	}
+	else {
+		return;
 	}
 }
 
 void playGame(int matrix[][10], const int SIZE, char command) {
+
 	if (checkSize(SIZE) && hasFreePosition(matrix, SIZE)) {
 		commandsMovement(command, matrix, SIZE);
 		randomGenerator(matrix, SIZE);
 	}
 }
 
-void safeInfoAboutPlayer(string nickname, const int SIZE) {
+void safeInfoAboutPlayer(string nickname, const int SIZE, int points) {
 	//check if result is in top 5
+
 
 	if (SIZE >= 4 && SIZE <= 10) {
 		ofstream file(to_string(SIZE) + "Dimension.txt", ios::app);
-		file << nickname << " - " << "points" << endl;
+		file << nickname << " - " << returnPoints(points) << endl;
 		file.close();
 	}
 }
@@ -268,7 +336,7 @@ int main()
 		cout << "Enter dimension: " << endl;
 		cin >> dimension;
 
-		safeInfoAboutPlayer(nickname, dimension);
+		safeInfoAboutPlayer(nickname, dimension, points);
 
 		randomGenerator(board, dimension);
 		while (hasFreePosition(board, dimension)) {
@@ -277,6 +345,7 @@ int main()
 		}
 	}
 	else if (ch == 'l') {
+
 		cout << "Enter dimension: ";
 		cin >> dimension;
 		showLeaderboard(dimension);
