@@ -25,7 +25,7 @@
 
 using namespace std;
 
-int points = 0;
+int POINTS = 0;
 
 void printMenu() {
 	cout << "-enter 's' to Start new game-" << endl;
@@ -50,8 +50,6 @@ bool checkSize(int SIZE) {
 	return true;
 }
 
-
-
 bool hasFreePosition(int matrix[][SIZE], const size_t SIZE) {
 	for (int i = 0; i < SIZE; i++) {
 		for (int j = 0; j < SIZE; j++) {
@@ -62,8 +60,6 @@ bool hasFreePosition(int matrix[][SIZE], const size_t SIZE) {
 	}
 	return false;
 }
-
-
 
 bool validCommand(char command) {
 	if (command == 'w' || command == 'a' || command == 's' || command == 'd') {
@@ -105,8 +101,8 @@ unsigned randomGenerator(int matrix[][SIZE], const size_t SIZE) {
 			break;
 		}
 	}
-	points += returnOnRandomTwoOrFour();
-	printMatrix(matrix, SIZE, points);
+	POINTS += returnOnRandomTwoOrFour();
+	printMatrix(matrix, SIZE, POINTS);
 }
 
 void commandsMovement(char command, int matrix[][SIZE], const size_t SIZE) {
@@ -198,29 +194,29 @@ int main()
 
 			if (!checkSize(dimension)) {
 				cout << "Invalid dimension!" << endl;
-				exit(0);
+				break;
 			}
 
 			randomGenerator(board, dimension);
 			while (hasFreePosition(board, dimension)) {
 				cin >> command;
-				playGame(board, dimension, command, points);
-				points += returnOnRandomTwoOrFour();
+				playGame(board, dimension, command, POINTS);
+				POINTS += returnOnRandomTwoOrFour();
 			}
 
-			safeInfoAboutPlayer(nickname, dimension, points);
-			points = 0;
+			safeInfoAboutPlayer(nickname, dimension, POINTS);
+			POINTS = 0;
 		}
 		else if (ch == 'l') {
 			cout << "Enter dimension: ";
 			cin >> dimension;
 			showLeaderboard(dimension);
-			exit(0);
+			break;
 		}
 
 		else if (ch == 'q') {
 			cout << "END" << endl;
-			exit(0);
+			break;
 		}
 
 		else {
