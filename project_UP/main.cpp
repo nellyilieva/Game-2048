@@ -37,6 +37,8 @@ void printMenu() {
 	cout << "-to make move left use 'a'-" << endl;
 	cout << "-to make move right use 'd'-" << endl;
 	cout << endl;
+	cout << "!To have a saved score, don't end the game before it's over!" << endl;
+	cout << endl;
 	cout << "MENU" << endl;
 	cout << "Start game" << endl;
 	cout << "Leaderboard" << endl;
