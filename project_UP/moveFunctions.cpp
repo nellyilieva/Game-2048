@@ -1,9 +1,7 @@
 #include <iostream>
 #include "moveFunctions.h"
-using namespace std;
 
-const size_t SIZE = 10;
-int points = 0;
+using namespace std;
 
 void makeMoveRight(int matrix[][SIZE], const size_t SIZE) {
 	for (int i = 0; i < SIZE; i++) {
